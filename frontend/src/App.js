@@ -61,16 +61,15 @@ function App() {
       <h1>Ship Status Tracker</h1>
       <h3>Auto refresh setiap 5 minutes</h3>
 
-      {/* Add Ship DI DISABLED DULU*/}
-
+      {/* Add Ship */}
       <form style={{ marginBottom: '20px' }}>
         <input
           type="text"
-          placeholder="New ship name"
+          placeholder="Add a new ship"
           value={newShipName}
           onChange={(e) => setNewShipName(e.target.value)}
         />
-        <button onClick={addShip}>Add Ship</button>
+        <button onClick={addShip} disabled>Add Ship</button>
       </form>
 
 

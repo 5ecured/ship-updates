@@ -48,7 +48,15 @@ app.post("/api/ships/:id/updates", async (req, res) => {
         const ship = await Ship.findById(req.params.id);
         if (!ship) return res.status(404).json({ error: "Ship not found" });
 
+        // Push the new update
         ship.updates.push({ status: req.body.status });
+
+        // Keep only the last 100 updates
+        if (ship.updates.length > 100) {
+            ship.updates = ship.updates.slice(-100)
+        }
+
+        // Then save to mongoDB
         await ship.save();
 
         res.json(ship);

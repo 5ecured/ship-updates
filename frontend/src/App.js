@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { formatDate } from "./utils";
+import './app.css'
 
 const API_URL = "http://localhost:5000/api"
 
@@ -79,7 +80,7 @@ function App() {
       {ships.map((ship) => (
         <div
           key={ship._id}
-          style={{ border: "1px solid #ccc", margin: "20px 0", padding: "10px", borderRadius: '15px', paddingLeft: '20px' }}
+          className="card"
         >
           <h2>{ship.name}</h2>
 
@@ -104,8 +105,9 @@ function App() {
             {ship.updates?.slice(-10)
               .reverse()
               .map((update, idx) => (
-                <li key={idx}>
-                  {update.status} ({formatDate(update.createdAt)})
+                <li key={idx} className="status-item">
+                  <span className="status-text">{update.status}</span>
+                  <span className="status-time">{formatDate(update.createdAt)}</span>
                 </li>
               ))}
           </ul>

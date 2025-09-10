@@ -57,20 +57,6 @@ app.post("/api/ships/:id/updates", async (req, res) => {
     }
 });
 
-// // Get updates for a ship
-// app.get("/api/ships/:id/updates", async (req, res) => {
-//     try {
-//         const updates = await ShipUpdate.find({ shipId: req.params.id })
-//             .sort({ createdAt: -1 })
-//             .limit(10);
-//         res.json(updates);
-//     } catch (err) {
-//         res.status(500).json({ error: "Failed to fetch updates" });
-//     }
-// });
-
-
-
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`✅ Backend running at http://localhost:${PORT}`);

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { formatDate } from "./utils";
 
 const API_URL = "http://localhost:5000/api"
 
@@ -8,9 +9,15 @@ function App() {
   const [newShipName, setNewShipName] = useState("");
   const [statusInputs, setStatusInputs] = useState({});
 
+  useEffect(() => {
+    fetchShips();
+    const interval = setInterval(fetchShips, 300_000)
+    return () => clearInterval(interval);
+  }, []);
+
   // Fetch all ships
   const fetchShips = async () => {
-    console.log('halo')
+    console.log('test')
     try {
       const res = await axios.get(`${API_URL}/ships`);
       setShips(res.data);
@@ -19,15 +26,12 @@ function App() {
     }
   };
 
-  useEffect(() => {
-    fetchShips();
-    const interval = setInterval(fetchShips, 120_000)
-    return () => clearInterval(interval);
-  }, []);
-
   // Add new ship
-  const addShip = async () => {
+  const addShip = async (e) => {
+    e.preventDefault()
+
     if (!newShipName.trim()) return;
+
     try {
       await axios.post(`${API_URL}/ships`, { name: newShipName });
       setNewShipName("");
@@ -40,7 +44,9 @@ function App() {
   // Add status update to a ship
   const addUpdate = async (shipId) => {
     const status = statusInputs[shipId];
+
     if (!status || !status.trim()) return;
+
     try {
       await axios.post(`${API_URL}/ships/${shipId}/updates`, { status });
       setStatusInputs({ ...statusInputs, [shipId]: "" });
@@ -52,11 +58,12 @@ function App() {
 
   return (
     <div style={{ padding: "20px" }}>
-      <h1>🚢 Ship Status Tracker</h1>
+      <h1>Ship Status Tracker</h1>
       <h3>Auto refresh setiap 5 minutes</h3>
 
-      {/* Add Ship */}
-      <div>
+      {/* Add Ship DI DISABLED DULU*/}
+
+      <form style={{ marginBottom: '20px' }}>
         <input
           type="text"
           placeholder="New ship name"
@@ -64,7 +71,8 @@ function App() {
           onChange={(e) => setNewShipName(e.target.value)}
         />
         <button onClick={addShip}>Add Ship</button>
-      </div>
+      </form>
+
 
       <hr />
 
@@ -72,12 +80,12 @@ function App() {
       {ships.map((ship) => (
         <div
           key={ship._id}
-          style={{ border: "1px solid #ccc", margin: "10px 0", padding: "10px" }}
+          style={{ border: "1px solid #ccc", margin: "20px 0", padding: "10px", borderRadius: '15px', paddingLeft: '20px' }}
         >
           <h2>{ship.name}</h2>
 
           {/* Status input */}
-          <div>
+          <form>
             <input
               type="text"
               placeholder="New status..."
@@ -86,8 +94,11 @@ function App() {
                 setStatusInputs({ ...statusInputs, [ship._id]: e.target.value })
               }
             />
-            <button onClick={() => addUpdate(ship._id)}>Add Status</button>
-          </div>
+            <button onClick={e => {
+              e.preventDefault()
+              addUpdate(ship._id)
+            }}>Add Status</button>
+          </form>
 
           {/* Last 10 updates */}
           <ul>
@@ -95,7 +106,7 @@ function App() {
               .reverse()
               .map((update, idx) => (
                 <li key={idx}>
-                  {update.status} <small>({new Date(update.createdAt).toLocaleString()})</small>
+                  {update.status} ({formatDate(update.createdAt)})
                 </li>
               ))}
           </ul>

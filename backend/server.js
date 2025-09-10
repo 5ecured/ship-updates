@@ -1,16 +1,14 @@
-const express = require("express")
-const mongoose = require("mongoose")
-const cors = require("cors")
-
-require('dotenv').config();
+import express from "express"
+import mongoose from "mongoose"
+import cors from "cors"
+import dotenv from 'dotenv'
+dotenv.config()
+import Ship from "./models/Ship.js";
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-
-
-// 1. Connect to MongoDB
 const connectDB = async () => {
     try {
         await mongoose.connect(process.env.MONGO_URI);
@@ -23,83 +21,56 @@ const connectDB = async () => {
 
 connectDB();
 
-// 2. Define a schema
-const shipUpdateSchema = new mongoose.Schema({
-    shipName: { type: String, required: true },
-    status: { type: String, required: true },
-    createdAt: { type: Date, default: Date.now },
-});
-
-const ShipUpdate = mongoose.model("ShipUpdate", shipUpdateSchema);
-
-
-// 3. API routes
-
-// Read (GET): fetch all ship updates
-app.get("/api/ship-updates", async (req, res) => {
+// Get all ships
+app.get("/api/ships", async (req, res) => {
     try {
-        const updates = await ShipUpdate.find().sort({ createdAt: -1 }).limit(20); // Newest first
-        res.json(updates);
+        const ships = await Ship.find();
+        res.json(ships);
     } catch (err) {
-        console.error("Error fetching updates:", err);
-        res.status(500).json({ error: "Failed to fetch updates" });
+        res.status(500).json({ error: "Failed to fetch ships" });
     }
 });
 
-// Create (POST): add a new ship update
-app.post("/api/ship-updates", async (req, res) => {
+// Add a new ship
+app.post("/api/ships", async (req, res) => {
     try {
-        const { shipName, status } = req.body;
-        if (!shipName || !status) {
-            return res.status(400).json({ error: "Ship name and status required" });
-        }
-
-        const newUpdate = new ShipUpdate({ shipName, status });
-        await newUpdate.save();
-
-        res.status(201).json(newUpdate);
+        const ship = new Ship({ name: req.body.name, updates: [] });
+        await ship.save();
+        res.json(ship);
     } catch (err) {
-        console.error("Error posting update:", err);
-        res.status(500).json({ error: "Failed to save update" });
+        res.status(500).json({ error: "Failed to add ship" });
     }
 });
 
-// Update (PUT): edit an update by ID
-app.put("/api/ship-updates/:id", async (req, res) => {
+// Add status update to a ship
+app.post("/api/ships/:id/updates", async (req, res) => {
     try {
-        const { id } = req.params;
-        const { shipName, status } = req.body;
+        const ship = await Ship.findById(req.params.id);
+        if (!ship) return res.status(404).json({ error: "Ship not found" });
 
-        const updated = await ShipUpdate.findByIdAndUpdate(
-            id,
-            { shipName, status },
-            { new: true } // To return updated ship
-        );
+        ship.updates.push({ status: req.body.status });
+        await ship.save();
 
-        if (!updated) return res.status(404).json({ error: "Update not found" });
-
-        res.json(updated);
+        res.json(ship);
     } catch (err) {
-        res.status(500).json({ error: "Failed to update ship status" });
+        res.status(500).json({ error: "Failed to add update" });
     }
 });
 
-// Delete (DELETE): remove an update by ID
-app.delete("/api/ship-updates/:id", async (req, res) => {
-    try {
-        const { id } = req.params;
-        const deleted = await ShipUpdate.findByIdAndDelete(id);
-
-        if (!deleted) return res.status(404).json({ error: "Update not found" });
-        
-        res.json({ message: "Ship update deleted" });
-    } catch (err) {
-        res.status(500).json({ error: "Failed to delete ship status" });
-    }
-});
+// // Get updates for a ship
+// app.get("/api/ships/:id/updates", async (req, res) => {
+//     try {
+//         const updates = await ShipUpdate.find({ shipId: req.params.id })
+//             .sort({ createdAt: -1 })
+//             .limit(10);
+//         res.json(updates);
+//     } catch (err) {
+//         res.status(500).json({ error: "Failed to fetch updates" });
+//     }
+// });
 
 
-// 4. Start server
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`✅ Backend running at http://localhost:${PORT}`);

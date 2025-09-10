@@ -1,110 +1,106 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-const API_URL = process.env.REACT_APP_BACKEND_URL
+const API_URL = "http://localhost:5000/api"
 
 function App() {
-  const [updates, setUpdates] = useState([]);
-  const [shipName, setShipName] = useState("");
-  const [status, setStatus] = useState("");
-  const [editingId, setEditingId] = useState(null);
+  const [ships, setShips] = useState([]);
+  const [newShipName, setNewShipName] = useState("");
+  const [statusInputs, setStatusInputs] = useState({});
+
+  // Fetch all ships
+  const fetchShips = async () => {
+    console.log('halo')
+    try {
+      const res = await axios.get(`${API_URL}/ships`);
+      setShips(res.data);
+    } catch (err) {
+      console.error("❌ Failed to fetch ships", err);
+    }
+  };
 
   useEffect(() => {
-    fetchUpdates();
-
-    const interval = setInterval(fetchUpdates, 300_000);
+    fetchShips();
+    const interval = setInterval(fetchShips, 120_000)
     return () => clearInterval(interval);
   }, []);
 
-  // Fetch updates
-  const fetchUpdates = async () => {
-    console.log('fetched')
+  // Add new ship
+  const addShip = async () => {
+    if (!newShipName.trim()) return;
     try {
-      const response = await axios.get(API_URL);
-      setUpdates(response.data);
+      await axios.post(`${API_URL}/ships`, { name: newShipName });
+      setNewShipName("");
+      fetchShips();
     } catch (err) {
-      console.error("Error fetching updates:", err);
+      console.error("❌ Failed to add ship", err);
     }
   };
 
-
-  // Create or update
-  const submitUpdate = async (e) => {
-    e.preventDefault();
-
+  // Add status update to a ship
+  const addUpdate = async (shipId) => {
+    const status = statusInputs[shipId];
+    if (!status || !status.trim()) return;
     try {
-      if (editingId) {
-        await axios.put(`${API_URL}/${editingId}`, {
-          shipName,
-          status,
-        });
-        setEditingId(null);
-      } else {
-        const res = await axios.post(API_URL, { shipName, status });
-        setUpdates([res.data, ...updates]);
-      }
-
-      setShipName("");
-      setStatus("");
-      fetchUpdates()
+      await axios.post(`${API_URL}/ships/${shipId}/updates`, { status });
+      setStatusInputs({ ...statusInputs, [shipId]: "" });
+      fetchShips();
     } catch (err) {
-      console.error("Error posting update:", err);
+      console.error("❌ Failed to add update", err);
     }
   };
-
-  // 🔹 Delete
-  const handleDelete = async (id) => {
-    await axios.delete(`${API_URL}/${id}`);
-    fetchUpdates();
-  };
-
-  const handleEdit = (update) => {
-    setEditingId(update._id);
-    setShipName(update.shipName);
-    setStatus(update.status);
-  };
-
-  const onCancelEdit = () => {
-    setEditingId(null)
-    setShipName('')
-    setStatus('')
-  }
 
   return (
-    <div style={{ textAlign: "center", maxWidth: "600px", margin: "auto" }}>
-      <h1>🚢 Ship Status Updates</h1>
+    <div style={{ padding: "20px" }}>
+      <h1>🚢 Ship Status Tracker</h1>
       <h3>Auto refresh setiap 5 minutes</h3>
-      {/* Form */}
-      <form onSubmit={submitUpdate} style={{ marginBottom: "20px" }}>
-        <input
-          placeholder="Ship Name"
-          value={shipName}
-          onChange={(e) => setShipName(e.target.value)}
-          required
-        />
-        <input
-          placeholder="Status"
-          value={status}
-          onChange={(e) => setStatus(e.target.value)}
-          required
-        />
-        <button type="submit">{editingId ? "Update" : "Add"}</button>
-        {editingId && <button onClick={() => onCancelEdit()}>Cancel</button>}
-      </form>
 
-      {/* Updates */}
-      <ul style={{ listStyle: "none", padding: 0 }}>
-        {updates.map((u) => (
-          <li key={u._id} style={{ borderBottom: "1px solid #ccc", margin: "10px 0" }}>
-            <strong>{u.shipName}</strong>: {u.status}
-            <br />
-            <button onClick={() => handleEdit(u)}>Edit</button>
-            <button onClick={() => handleDelete(u._id)}>Delete</button>
-            <br />
-            <small>{new Date(u.createdAt).toLocaleString()}</small>
-          </li>
-        ))}
-      </ul>
+      {/* Add Ship */}
+      <div>
+        <input
+          type="text"
+          placeholder="New ship name"
+          value={newShipName}
+          onChange={(e) => setNewShipName(e.target.value)}
+        />
+        <button onClick={addShip}>Add Ship</button>
+      </div>
+
+      <hr />
+
+      {/* List ships and updates */}
+      {ships.map((ship) => (
+        <div
+          key={ship._id}
+          style={{ border: "1px solid #ccc", margin: "10px 0", padding: "10px" }}
+        >
+          <h2>{ship.name}</h2>
+
+          {/* Status input */}
+          <div>
+            <input
+              type="text"
+              placeholder="New status..."
+              value={statusInputs[ship._id] || ""}
+              onChange={(e) =>
+                setStatusInputs({ ...statusInputs, [ship._id]: e.target.value })
+              }
+            />
+            <button onClick={() => addUpdate(ship._id)}>Add Status</button>
+          </div>
+
+          {/* Last 10 updates */}
+          <ul>
+            {ship.updates?.slice(-10)
+              .reverse()
+              .map((update, idx) => (
+                <li key={idx}>
+                  {update.status} <small>({new Date(update.createdAt).toLocaleString()})</small>
+                </li>
+              ))}
+          </ul>
+        </div>
+      ))}
     </div>
   );
 }

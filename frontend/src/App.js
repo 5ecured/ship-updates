@@ -7,9 +7,18 @@ function App() {
   const [updates, setUpdates] = useState([]);
   const [shipName, setShipName] = useState("");
   const [status, setStatus] = useState("");
+  const [editingId, setEditingId] = useState(null);
+
+  useEffect(() => {
+    fetchUpdates();
+
+    const interval = setInterval(fetchUpdates, 300_000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Fetch updates
   const fetchUpdates = async () => {
+    console.log('fetched')
     try {
       const response = await axios.get(API_URL);
       setUpdates(response.data);
@@ -18,15 +27,23 @@ function App() {
     }
   };
 
-  useEffect(() => {
-    fetchUpdates();
-  }, []);
 
+  // Create or update
   const submitUpdate = async (e) => {
     e.preventDefault();
+
     try {
-      const res = await axios.post(API_URL, { shipName, status });
-      setUpdates([res.data, ...updates]);
+      if (editingId) {
+        await axios.put(`${API_URL}/${editingId}`, {
+          shipName,
+          status,
+        });
+        setEditingId(null);
+      } else {
+        const res = await axios.post(API_URL, { shipName, status });
+        setUpdates([res.data, ...updates]);
+      }
+
       setShipName("");
       setStatus("");
       fetchUpdates()
@@ -35,10 +52,22 @@ function App() {
     }
   };
 
+  // 🔹 Delete
+  const handleDelete = async (id) => {
+    await axios.delete(`${API_URL}/${id}`);
+    fetchUpdates();
+  };
+
+  const handleEdit = (update) => {
+    setEditingId(update._id);
+    setShipName(update.shipName);
+    setStatus(update.status);
+  };
+
   return (
     <div style={{ textAlign: "center", maxWidth: "600px", margin: "auto" }}>
       <h1>🚢 Ship Status Updates</h1>
-
+      <h3>Auto refresh setiap 5 minutes</h3>
       {/* Form */}
       <form onSubmit={submitUpdate} style={{ marginBottom: "20px" }}>
         <input
@@ -53,7 +82,8 @@ function App() {
           onChange={(e) => setStatus(e.target.value)}
           required
         />
-        <button type="submit">Post Update</button>
+        <button type="submit">{editingId ? "Update" : "Add"}</button>
+        {editingId && <button onClick={() => setEditingId(null)}>Cancel</button>}
       </form>
 
       {/* Updates */}
@@ -61,6 +91,9 @@ function App() {
         {updates.map((u) => (
           <li key={u._id} style={{ borderBottom: "1px solid #ccc", margin: "10px 0" }}>
             <strong>{u.shipName}</strong>: {u.status}
+            <br />
+            <button onClick={() => handleEdit(u)}>Edit</button>
+            <button onClick={() => handleDelete(u._id)}>Delete</button>
             <br />
             <small>{new Date(u.createdAt).toLocaleString()}</small>
           </li>

@@ -68,17 +68,19 @@ app.post("/api/ship-updates", async (req, res) => {
 app.put("/api/ship-updates/:id", async (req, res) => {
     try {
         const { id } = req.params;
-        const { status } = req.body;
+        const { shipName, status } = req.body;
 
         const updated = await ShipUpdate.findByIdAndUpdate(
             id,
-            { status },
-            { new: true }
+            { shipName, status },
+            { new: true } // To return updated ship
         );
+
+        if (!updated) return res.status(404).json({ error: "Update not found" });
 
         res.json(updated);
     } catch (err) {
-        res.status(500).json({ error: "Failed to update ship update" });
+        res.status(500).json({ error: "Failed to update ship status" });
     }
 });
 
@@ -86,10 +88,13 @@ app.put("/api/ship-updates/:id", async (req, res) => {
 app.delete("/api/ship-updates/:id", async (req, res) => {
     try {
         const { id } = req.params;
-        await ShipUpdate.findByIdAndDelete(id);
+        const deleted = await ShipUpdate.findByIdAndDelete(id);
+
+        if (!deleted) return res.status(404).json({ error: "Update not found" });
+        
         res.json({ message: "Ship update deleted" });
     } catch (err) {
-        res.status(500).json({ error: "Failed to delete ship update" });
+        res.status(500).json({ error: "Failed to delete ship status" });
     }
 });
 

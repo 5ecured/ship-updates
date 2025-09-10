@@ -64,6 +64,12 @@ function App() {
     setStatus(update.status);
   };
 
+  const onCancelEdit = () => {
+    setEditingId(null)
+    setShipName('')
+    setStatus('')
+  }
+
   return (
     <div style={{ textAlign: "center", maxWidth: "600px", margin: "auto" }}>
       <h1>🚢 Ship Status Updates</h1>
@@ -83,7 +89,7 @@ function App() {
           required
         />
         <button type="submit">{editingId ? "Update" : "Add"}</button>
-        {editingId && <button onClick={() => setEditingId(null)}>Cancel</button>}
+        {editingId && <button onClick={() => onCancelEdit()}>Cancel</button>}
       </form>
 
       {/* Updates */}

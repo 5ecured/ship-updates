@@ -3,18 +3,36 @@ import axios from "axios";
 import { formatDate } from "./utils";
 import './app.css'
 
-const API_URL = "http://localhost:5000/api"
+const API_URL = process.env.REACT_APP_BACKEND_URL
 
-function App() {
+const App = () => {
   const [ships, setShips] = useState([]);
   const [newShipName, setNewShipName] = useState("");
   const [statusInputs, setStatusInputs] = useState({});
+  const [showScroll, setShowScroll] = useState(false);
 
   useEffect(() => {
     fetchShips();
     const interval = setInterval(fetchShips, 300_000)
     return () => clearInterval(interval);
   }, []);
+
+  // show button after scrolling down
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 800) {
+        setShowScroll(true);
+      } else {
+        setShowScroll(false);
+      }
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   // Fetch all ships
   const fetchShips = async () => {
@@ -111,6 +129,12 @@ function App() {
                 </li>
               ))}
           </ul>
+
+          {showScroll && (
+            <button className="scrollTopBtn" onClick={scrollToTop}>
+              ↑
+            </button>
+          )}
         </div>
       ))}
     </div>

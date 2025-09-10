@@ -1,23 +1,24 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 
-const API_URL = "http://localhost:5000/api/updates";
+const API_URL = process.env.REACT_APP_BACKEND_URL
 
 function App() {
   const [updates, setUpdates] = useState([]);
   const [shipName, setShipName] = useState("");
   const [status, setStatus] = useState("");
 
-  useEffect(() => {
-    const fetchUpdates = async () => {
-      try {
-        const res = await axios.get(API_URL);
-        setUpdates(res.data);
-      } catch (err) {
-        console.error("Error fetching updates:", err);
-      }
-    };
+  // Fetch updates
+  const fetchUpdates = async () => {
+    try {
+      const response = await axios.get(API_URL);
+      setUpdates(response.data);
+    } catch (err) {
+      console.error("Error fetching updates:", err);
+    }
+  };
 
+  useEffect(() => {
     fetchUpdates();
   }, []);
 
@@ -28,6 +29,7 @@ function App() {
       setUpdates([res.data, ...updates]);
       setShipName("");
       setStatus("");
+      fetchUpdates()
     } catch (err) {
       console.error("Error posting update:", err);
     }

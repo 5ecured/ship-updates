@@ -9,6 +9,7 @@ app.use(cors());
 app.use(express.json());
 
 
+
 // 1. Connect to MongoDB
 const connectDB = async () => {
     try {
@@ -31,10 +32,13 @@ const shipUpdateSchema = new mongoose.Schema({
 
 const ShipUpdate = mongoose.model("ShipUpdate", shipUpdateSchema);
 
+
 // 3. API routes
-app.get("/api/updates", async (req, res) => {
+
+// Read (GET): fetch all ship updates
+app.get("/api/ship-updates", async (req, res) => {
     try {
-        const updates = await ShipUpdate.find().sort({ createdAt: -1 }).limit(20);
+        const updates = await ShipUpdate.find().sort({ createdAt: -1 }).limit(20); // Newest first
         res.json(updates);
     } catch (err) {
         console.error("Error fetching updates:", err);
@@ -42,22 +46,53 @@ app.get("/api/updates", async (req, res) => {
     }
 });
 
-app.post("/api/updates", async (req, res) => {
+// Create (POST): add a new ship update
+app.post("/api/ship-updates", async (req, res) => {
     try {
         const { shipName, status } = req.body;
         if (!shipName || !status) {
             return res.status(400).json({ error: "Ship name and status required" });
         }
 
-        const update = new ShipUpdate({ shipName, status });
-        await update.save();
+        const newUpdate = new ShipUpdate({ shipName, status });
+        await newUpdate.save();
 
-        res.json(update);
+        res.status(201).json(newUpdate);
     } catch (err) {
         console.error("Error posting update:", err);
         res.status(500).json({ error: "Failed to save update" });
     }
 });
+
+// Update (PUT): edit an update by ID
+app.put("/api/ship-updates/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { status } = req.body;
+
+        const updated = await ShipUpdate.findByIdAndUpdate(
+            id,
+            { status },
+            { new: true }
+        );
+
+        res.json(updated);
+    } catch (err) {
+        res.status(500).json({ error: "Failed to update ship update" });
+    }
+});
+
+// Delete (DELETE): remove an update by ID
+app.delete("/api/ship-updates/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        await ShipUpdate.findByIdAndDelete(id);
+        res.json({ message: "Ship update deleted" });
+    } catch (err) {
+        res.status(500).json({ error: "Failed to delete ship update" });
+    }
+});
+
 
 // 4. Start server
 const PORT = process.env.PORT || 5000;

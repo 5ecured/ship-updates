@@ -44,6 +44,26 @@ body {
 .status-text {
     font-size: 1.1rem;
     color: #444;
+    cursor: pointer;
+    transition: color 0.2s ease;
+    position: relative;
+    display: inline;
+}
+
+.status-text:hover {
+    color: #007bff;
+}
+
+.status-text::after {
+    content: "✏️";
+    opacity: 0;
+    margin-left: 8px;
+    transition: opacity 0.2s ease;
+    font-size: 0.9em;
+}
+
+.status-text:hover::after {
+    opacity: 1;
 }
 
 .status-time {
@@ -80,4 +100,24 @@ body {
     border: 1px solid #ccc;
     cursor: pointer;
     background: #f9f9f9;
+}
+
+.status-input {
+    flex: 1;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+}
+
+.status-button {
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: none;
+    background-color: #007bff;
+    color: #fff;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin: 8px;
 }

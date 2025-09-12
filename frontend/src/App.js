@@ -11,6 +11,9 @@ const App = () => {
   const [newShipName, setNewShipName] = useState("");
   const [statusInputs, setStatusInputs] = useState({});
   const [showScroll, setShowScroll] = useState(false);
+  const [editingUpdate, setEditingUpdate] = useState(null);
+  const [editText, setEditText] = useState("");
+
 
   useEffect(() => {
     fetchShips();
@@ -76,6 +79,20 @@ const App = () => {
     }
   };
 
+  // Edit status
+  const saveEdit = async (shipId, updateId) => {
+    try {
+      await axios.put(`${API_URL}/ships/${shipId}/updates/${updateId}`, {
+        status: editText,
+      });
+      setEditingUpdate(null);
+      setEditText("");
+      fetchShips()
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   return (
     <div style={{ padding: "20px" }}>
 
@@ -135,20 +152,55 @@ const App = () => {
               onChange={(e) =>
                 setStatusInputs({ ...statusInputs, [ship._id]: e.target.value })
               }
+              className="status-input"
             />
-            <button onClick={e => {
-              e.preventDefault()
-              addUpdate(ship._id)
-            }}>Add Status</button>
+            <button
+              onClick={e => {
+                e.preventDefault()
+                addUpdate(ship._id)
+              }}
+              className="status-button"
+            >
+              Add Status
+            </button>
           </form>
 
           {/* Last 10 updates */}
           <ul>
             {ship.updates?.slice(-10)
               .reverse()
-              .map((update, idx) => (
-                <li key={idx} className="status-item">
-                  <div className="status-text">{update.status}</div>
+              .map(update => (
+                <li key={update._id} className="status-item">
+                  {editingUpdate?.updateId === update._id ? (
+                    <form
+                      onSubmit={e => {
+                        e.preventDefault();
+                        saveEdit(ship._id, update._id);
+                      }}
+                    >
+                      <input
+                        type="text"
+                        value={editText}
+                        onChange={e => setEditText(e.target.value)}
+                        autoFocus
+                      />
+                      <button onClick={() => saveEdit(ship._id, update._id)}>Save</button>
+                      <button onClick={() => setEditingUpdate(null)}>Cancel</button>
+                    </form>
+                  ) : (
+                    // Status
+                    <div
+                      className="status-text"
+                      onClick={() => {
+                        setEditingUpdate({ shipId: ship._id, updateId: update._id });
+                        setEditText(update.status);
+                      }}
+                      style={{ cursor: "pointer" }}
+                    >
+                      {update.status}
+                    </div>
+                  )}
+                  {/* Timestamp */}
                   <div className="status-time" style={{ marginTop: '12px' }}>
                     {formatDate(update.createdAt)}
                     <span style={{ marginLeft: "20px" }}>({timeAgo(update.createdAt)})</span>
@@ -163,8 +215,9 @@ const App = () => {
             </button>
           )}
         </div>
-      ))}
-    </div>
+      ))
+      }
+    </div >
   );
 }
 

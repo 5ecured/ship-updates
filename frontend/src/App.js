@@ -83,7 +83,6 @@ const App = () => {
         <h1>PT MIS Ship Status Tracker</h1>
         <h3>Auto refresh setiap 5 minutes</h3>
 
-
         {/* Add Ship */}
 
         {/* <form style={{ marginBottom: '20px' }}>
@@ -97,7 +96,6 @@ const App = () => {
         </form> */}
 
       </div>
-
 
       {/* Centered ship buttons */}
       <div style={{ textAlign: "center", margin: "20px 0" }}>

@@ -81,7 +81,7 @@ const App = () => {
 
       <div style={{ textAlign: 'center' }}>
         <h1>PT MIS Ship Status Tracker</h1>
-        <h3>Auto refresh setiap 5 minutes</h3>
+        <h3>(App ini auto-refresh setiap 5 menit)</h3>
 
         {/* Add Ship */}
 

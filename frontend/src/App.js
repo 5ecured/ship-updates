@@ -13,6 +13,7 @@ const App = () => {
   const [showScroll, setShowScroll] = useState(false);
   const [editingUpdate, setEditingUpdate] = useState(null);
   const [editText, setEditText] = useState("");
+  const [visibleCount, setVisibleCount] = useState({});
 
 
   useEffect(() => {
@@ -167,7 +168,7 @@ const App = () => {
 
           {/* Last 10 updates */}
           <ul>
-            {ship.updates?.slice(-10)
+            {ship.updates?.slice(-(visibleCount[ship._id] || 5))
               .reverse()
               .map(update => (
                 <li key={update._id} className="status-item">
@@ -207,6 +208,21 @@ const App = () => {
                   </div>
                 </li>
               ))}
+
+            {/* Show more */}
+            {ship.updates && ship.updates.length > (visibleCount[ship._id] || 5) && (
+              <button
+                onClick={() =>
+                  setVisibleCount({
+                    ...visibleCount,
+                    [ship._id]: (visibleCount[ship._id] || 5) + 5,
+                  })
+                }
+                className="showMoreBtn"
+              >
+                Show more
+              </button>
+            )}
           </ul>
 
           {showScroll && (

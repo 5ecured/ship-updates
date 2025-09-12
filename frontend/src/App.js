@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { formatDate } from "./utils";
 import './app.css'
+import { timeAgo } from "./utils";
 
 const API_URL = process.env.REACT_APP_BACKEND_URL
 
@@ -77,20 +78,43 @@ const App = () => {
 
   return (
     <div style={{ padding: "20px" }}>
-      <h1>Ship Status Tracker</h1>
-      <h3>Auto refresh setiap 5 minutes</h3>
 
-      {/* Add Ship */}
-      <form style={{ marginBottom: '20px' }}>
-        <input
-          type="text"
-          placeholder="Add a new ship"
-          value={newShipName}
-          onChange={(e) => setNewShipName(e.target.value)}
-        />
-        <button onClick={addShip} disabled>Add Ship</button>
-      </form>
+      <div style={{ textAlign: 'center' }}>
+        <h1>PT MIS Ship Status Tracker</h1>
+        <h3>Auto refresh setiap 5 minutes</h3>
 
+
+        {/* Add Ship */}
+
+        {/* <form style={{ marginBottom: '20px' }}>
+          <input
+            type="text"
+            placeholder="Add a new ship"
+            value={newShipName}
+            onChange={(e) => setNewShipName(e.target.value)}
+          />
+          <button onClick={addShip}>Add Ship</button>
+        </form> */}
+
+      </div>
+
+
+      {/* Centered ship buttons */}
+      <div style={{ textAlign: "center", margin: "20px 0" }}>
+        {ships.map((ship) => (
+          <button
+            key={ship._id}
+            onClick={() =>
+              document
+                .getElementById(`ship-${ship._id}`)
+                .scrollIntoView({ behavior: "smooth" })
+            }
+            className="quicknav-buttons"
+          >
+            {ship.name}
+          </button>
+        ))}
+      </div>
 
       <hr />
 
@@ -99,6 +123,7 @@ const App = () => {
         <div
           key={ship._id}
           className="card"
+          id={`ship-${ship._id}`}
         >
           <h2>{ship.name}</h2>
 
@@ -124,8 +149,11 @@ const App = () => {
               .reverse()
               .map((update, idx) => (
                 <li key={idx} className="status-item">
-                  <span className="status-text">{update.status}</span>
-                  <span className="status-time">{formatDate(update.createdAt)}</span>
+                  <div className="status-text">{update.status}</div>
+                  <div className="status-time" style={{ marginTop: '12px' }}>
+                    {formatDate(update.createdAt)}
+                    <span style={{ marginLeft: "20px" }}>({timeAgo(update.createdAt)})</span>
+                  </div>
                 </li>
               ))}
           </ul>

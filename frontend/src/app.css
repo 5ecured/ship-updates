@@ -42,12 +42,12 @@ body {
 }
 
 .status-text {
-    font-size: 0.95rem;
+    font-size: 1.1rem;
     color: #444;
 }
 
 .status-time {
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     color: #888;
     margin-top: 4px;
     display: block;
@@ -71,4 +71,13 @@ body {
 
 .scrollTopBtn:hover {
     background-color: #0056b3;
+}
+
+.quicknav-buttons {
+    margin: 5px 5px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    cursor: pointer;
+    background: #f9f9f9;
 }

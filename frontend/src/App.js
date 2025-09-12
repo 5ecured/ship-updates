@@ -80,6 +80,7 @@ const App = () => {
     <div style={{ padding: "20px" }}>
 
       <div style={{ textAlign: 'center' }}>
+        {/* Heading */}
         <h1>PT MIS Ship Status Tracker</h1>
         <h3>(App ini auto-refresh setiap 5 menit)</h3>
 
@@ -97,7 +98,7 @@ const App = () => {
 
       </div>
 
-      {/* Centered ship buttons */}
+      {/* Quick Nav buttons */}
       <div style={{ textAlign: "center", margin: "20px 0" }}>
         {ships.map((ship) => (
           <button

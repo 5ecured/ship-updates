@@ -97,9 +97,10 @@ const App = () => {
 
   if (isLoading) {
     return (
-      <div style={{ textAlign: 'center' }}>
+      <div style={{ textAlign: 'center', padding: '20px' }}>
         <h1>PT MIS Ship Status Tracker</h1>
         <h3>Loading...maximum 1 menit</h3>
+        <h4>Harus loading karena inactive selama 15 menit. Sesudah sekali loading, kedepannya akan cepat</h4>
       </div>
     )
   }

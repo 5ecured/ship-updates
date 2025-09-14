@@ -14,7 +14,7 @@ const App = () => {
   const [editingUpdate, setEditingUpdate] = useState(null);
   const [editText, setEditText] = useState("");
   const [visibleCount, setVisibleCount] = useState({});
-
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     fetchShips();
@@ -45,6 +45,7 @@ const App = () => {
     try {
       const res = await axios.get(`${API_URL}/ships`);
       setShips(res.data);
+      setIsLoading(false)
     } catch (err) {
       console.error("❌ Failed to fetch ships", err);
     }
@@ -93,6 +94,15 @@ const App = () => {
       console.error(err);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div style={{ textAlign: 'center' }}>
+        <h1>PT MIS Ship Status Tracker</h1>
+        <h3>Loading...maximum 1 menit</h3>
+      </div>
+    )
+  }
 
   return (
     <div style={{ padding: "20px" }}>
